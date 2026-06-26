@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Shadow Nomad"/>
+<meta name="theme-color" content="#f7f4ef"/>
+<title>Shadow Nomad — English Words</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:#f7f4ef; --surface:#fff; --border:#e2ddd6; --ink:#1a1814;
+    --muted:#8a8278; --gold:#b07d3a; --gold-lt:#f0e6d3; --red:#b03a3a;
+  }
+  body { background:var(--bg); color:var(--ink); font-family:'Georgia',serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:32px 16px 80px; }
+  header { width:100%; max-width:560px; display:flex; justify-content:space-between; align-items:baseline; margin-bottom:28px; border-bottom:2px solid var(--ink); padding-bottom:10px; }
+  header h1 { font-size:1.1rem; }
+  header h1 span { color:var(--gold); }
+  #card-count { font-size:0.8rem; color:var(--muted); font-style:italic; }
+  .search-area { width:100%; max-width:560px; display:flex; gap:8px; margin-bottom:10px; }
+  input[type="text"] { flex:1; border:1.5px solid var(--border); background:var(--surface); color:var(--ink); font-family:'Georgia',serif; font-size:1rem; padding:11px 14px; border-radius:6px; outline:none; transition:border-color 0.2s; }
+  input[type="text"]:focus { border-color:var(--gold); }
+  input[type="text"]::placeholder { color:#bbb; }
+  .btn { border:none; font-family:'Georgia',serif; font-size:0.9rem; padding:11px 18px; border-radius:6px; cursor:pointer; transition:opacity 0.15s; white-space:nowrap; }
+  .btn:disabled { opacity:0.45; cursor:not-allowed; }
+  .btn-primary { background:var(--ink); color:var(--bg); }
+  .btn-primary:hover:not(:disabled) { opacity:0.82; }
+  #loader { width:100%; max-width:560px; height:3px; background:var(--border); border-radius:2px; margin-bottom:8px; overflow:hidden; display:none; }
+  #loader.active { display:block; }
+  #loader-bar { height:100%; background:var(--gold); border-radius:2px; animation:loading 2s ease-in-out infinite; }
+  @keyframes loading { 0%{width:0%;margin-left:0} 50%{width:70%;margin-left:15%} 100%{width:0%;margin-left:100%} }
+  #status { width:100%; max-width:560px; font-size:0.85rem; font-style:italic; color:var(--muted); min-height:18px; margin-bottom:14px; text-align:center; }
+  #status.err { color:var(--red); font-style:normal; }
+  .tabs { width:100%; max-width:560px; display:flex; margin-bottom:20px; border-bottom:1.5px solid var(--border); }
+  .tab { padding:8px 18px; font-family:'Georgia',serif; font-size:0.85rem; background:none; border:none; cursor:pointer; color:var(--muted); border-bottom:2.5px solid transparent; margin-bottom:-1.5px; letter-spacing:0.04em; }
+  .tab.active { color:var(--ink); border-bottom-color:var(--gold); font-weight:bold; }
+  .view { width:100%; max-width:560px; display:none; }
+  .view.active { display:block; }
+  .card-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media(max-width:420px){ .card-grid{ grid-template-columns:1fr; } }
+  .flip-wrap { perspective:900px; height:220px; cursor:pointer; }
+  .flip-inner { width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform 0.45s cubic-bezier(.4,0,.2,1); }
+  .flip-wrap.flipped .flip-inner { transform:rotateY(180deg); }
+  .card-face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border:1.5px solid var(--border); border-radius:10px; padding:18px 16px 14px; display:flex; flex-direction:column; background:var(--surface); }
+  .card-face.back { transform:rotateY(180deg); background:#fdfaf5; overflow-y:auto; }
+  .card-front-word { flex:1; display:flex; align-items:center; justify-content:center; font-size:1.7rem; font-style:italic; text-align:center; }
+  .card-front-hint { font-size:0.7rem; color:var(--muted); text-align:center; letter-spacing:0.1em; text-transform:uppercase; margin-top:auto; }
+  .card-pron { font-size:0.8rem; color:var(--gold); margin-bottom:8px; }
+  .card-def { font-size:0.82rem; color:#444; line-height:1.5; margin-bottom:8px; }
+  .card-ex { font-size:0.78rem; color:var(--muted); font-style:italic; line-height:1.45; padding-left:8px; border-left:2px solid var(--border); margin-bottom:5px; }
+  .card-actions { display:flex; justify-content:flex-end; margin-top:6px; }
+  .btn-delete { font-size:0.72rem; padding:4px 10px; border-radius:4px; background:none; border:1px solid #ddd; color:var(--red); cursor:pointer; font-family:'Georgia',serif; }
+  .btn-delete:hover { background:#fdeaea; }
+  .empty { text-align:center; color:var(--muted); font-style:italic; font-size:0.9rem; padding:48px 0; }
+  #repaso-area { display:flex; flex-direction:column; align-items:center; gap:20px; }
+  .repaso-counter { font-size:0.8rem; color:var(--muted); font-style:italic; }
+  .repaso-flip-wrap { perspective:900px; width:100%; height:300px; cursor:pointer; }
+  .repaso-flip-inner { width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform 0.45s cubic-bezier(.4,0,.2,1); }
+  .repaso-flip-wrap.flipped .repaso-flip-inner { transform:rotateY(180deg); }
+  .repaso-face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; border:1.5px solid var(--border); border-radius:14px; padding:28px 24px; background:var(--surface); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+  .repaso-face.back { transform:rotateY(180deg); background:#fdfaf5; align-items:flex-start; text-align:left; justify-content:flex-start; overflow-y:auto; }
+  .repaso-word { font-size:2.6rem; font-style:italic; line-height:1.1; }
+  .repaso-hint { margin-top:16px; font-size:0.75rem; color:var(--muted); letter-spacing:0.12em; text-transform:uppercase; }
+  .repaso-pron { font-size:0.9rem; color:var(--gold); margin-bottom:12px; }
+  .repaso-def { font-size:0.95rem; color:#333; line-height:1.6; margin-bottom:14px; }
+  .repaso-ex { font-size:0.85rem; color:var(--muted); font-style:italic; line-height:1.5; padding-left:10px; border-left:2px solid var(--border); margin-bottom:8px; width:100%; }
+  .repaso-nav { display:flex; gap:10px; }
+  .btn-nav { background:var(--surface); border:1.5px solid var(--border); color:var(--ink); font-family:'Georgia',serif; font-size:0.9rem; padding:10px 22px; border-radius:6px; cursor:pointer; }
+  .btn-nav:hover { background:var(--gold-lt); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Shadow Nomad <span>— English Words</span></h1>
+  <span id="card-count">0 tarjetas</span>
+</header>
+<div class="search-area">
+  <input type="text" id="wordInput" placeholder="Escribe una palabra en inglés…" autocomplete="off"/>
+  <button class="btn btn-primary" id="searchBtn" onclick="lookup()">Buscar</button>
+</div>
+<div id="loader"><div id="loader-bar"></div></div>
+<div id="status"></div>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('coleccion')">Mi colección</button>
+  <button class="tab" onclick="showTab('repaso')">Modo repaso</button>
+</div>
+<div class="view active" id="view-coleccion">
+  <div class="card-grid" id="cardGrid"></div>
+</div>
+<div class="view" id="view-repaso">
+  <div id="repaso-area"></div>
+</div>
+<script>
+const STORAGE_KEY='wordcards_v1';
+let cards=[], repasoIndex=0, repasoOrder=[];
+
+function save(){ localStorage.setItem(STORAGE_KEY,JSON.stringify(cards)); updateCount(); }
+function load(){ try{ cards=JSON.parse(localStorage.getItem(STORAGE_KEY))||[]; }catch{ cards=[]; } updateCount(); renderGrid(); }
+function updateCount(){ const n=cards.length; document.getElementById('card-count').textContent=n===1?'1 tarjeta':`${n} tarjetas`; }
+
+async function lookup(){
+  const word=document.getElementById('wordInput').value.trim();
+  if(!word) return;
+  if(cards.find(c=>c.word.toLowerCase()===word.toLowerCase())) return setStatus('Esa palabra ya está en tu colección.',false);
+  const btn=document.getElementById('searchBtn');
+  btn.disabled=true;
+  document.getElementById('loader').classList.add('active');
+  setStatus('Buscando "'+word+'"…',false);
+  try{
+    const res=await fetch('/.netlify/functions/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({word})});
+    const parsed=await res.json();
+    if(parsed.debug) throw new Error(JSON.stringify(parsed));
+    cards.unshift({...parsed,id:Date.now()});
+    save(); renderGrid();
+    setStatus('"'+parsed.word+'" guardada ✓',false);
+    document.getElementById('wordInput').value='';
+    showTab('coleccion');
+  }catch(e){ setStatus('Error: '+e.message,true); }
+  document.getElementById('loader').classList.remove('active');
+  btn.disabled=false;
+}
+
+function setStatus(msg,isErr){ const el=document.getElementById('status'); el.textContent=msg; el.className=isErr?'err':''; if(msg) setTimeout(()=>{ el.textContent=''; el.className=''; },5000); }
+function deleteCard(id){ cards=cards.filter(c=>c.id!==id); save(); renderGrid(); if(document.getElementById('view-repaso').classList.contains('active')) startRepaso(); }
+
+function renderGrid(){
+  const grid=document.getElementById('cardGrid');
+  if(!cards.length){ grid.innerHTML='<p class="empty" style="grid-column:1/-1">Aún no tienes tarjetas.<br>Busca tu primera palabra ↑</p>'; return; }
+  grid.innerHTML=cards.map(c=>`
+    <div class="flip-wrap" id="fw-${c.id}" onclick="flipCard(${c.id},event)">
+      <div class="flip-inner">
+        <div class="card-face front"><div class="card-front-word">${c.word}</div><div class="card-front-hint">toca para ver</div></div>
+        <div class="card-face back">
+          <div class="card-pron">🔊 ${c.pronunciation}</div>
+          <div class="card-def">${c.definition}</div>
+          ${c.examples.map(ex=>`<div class="card-ex">${ex}</div>`).join('')}
+          <div class="card-actions"><button class="btn-delete" onclick="deleteCard(${c.id})">Eliminar</button></div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function flipCard(id,e){ if(e.target.classList.contains('btn-delete')) return; document.getElementById(`fw-${id}`).classList.toggle('flipped'); }
+
+function startRepaso(){ repasoOrder=[...cards].sort(()=>Math.random()-0.5); repasoIndex=0; renderRepaso(); }
+
+function renderRepaso(){
+  const area=document.getElementById('repaso-area');
+  if(!repasoOrder.length){ area.innerHTML='<p style="text-align:center;color:var(--muted);font-style:italic;padding:60px 0">No tienes tarjetas todavía.</p>'; return; }
+  const c=repasoOrder[repasoIndex];
+  area.innerHTML=`
+    <div class="repaso-counter">${repasoIndex+1} / ${repasoOrder.length}</div>
+    <div class="repaso-flip-wrap" id="rfw" onclick="flipRepaso()">
+      <div class="repaso-flip-inner">
+        <div class="repaso-face front"><div class="repaso-word">${c.word}</div><div class="repaso-hint">toca para ver definición</div></div>
+        <div class="repaso-face back">
+          <div class="repaso-pron">🔊 ${c.pronunciation}</div>
+          <div class="repaso-def">${c.definition}</div>
+          ${c.examples.map(ex=>`<div class="repaso-ex">${ex}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="repaso-nav">
+      <button class="btn-nav" onclick="prevCard()">← Anterior</button>
+      <button class="btn-nav" onclick="nextCard()">Siguiente →</button>
+    </div>
+    <button class="btn-nav" onclick="startRepaso()" style="font-size:0.78rem;padding:7px 14px;color:var(--muted)">↺ Barajar de nuevo</button>`;
+}
+
+function flipRepaso(){ document.getElementById('rfw').classList.toggle('flipped'); }
+function nextCard(){ repasoIndex=(repasoIndex+1)%repasoOrder.length; renderRepaso(); }
+function prevCard(){ repasoIndex=(repasoIndex-1+repasoOrder.length)%repasoOrder.length; renderRepaso(); }
+function showTab(name){ document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['coleccion','repaso'][i]===name)); document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById('view-'+name).classList.add('active'); if(name==='repaso') startRepaso(); }
+document.getElementById('wordInput').addEventListener('keydown',e=>{ if(e.key==='Enter') lookup(); });
+load();
+</script>
+</body>
+</html>
