@@ -143,7 +143,6 @@ function renderGrid(){
 }
 
 function flipCard(id,e){ if(e.target.classList.contains('btn-delete')) return; document.getElementById(`fw-${id}`).classList.toggle('flipped'); }
-
 function startRepaso(){ repasoOrder=[...cards].sort(()=>Math.random()-0.5); repasoIndex=0; renderRepaso(); }
 
 function renderRepaso(){
